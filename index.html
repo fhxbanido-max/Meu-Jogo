@@ -1,0 +1,158 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Acerte o Alvo</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #141e30, #243b55);
+  color: white;
+  text-align: center;
+}
+
+.container {
+  max-width: 650px;
+  margin: 40px auto;
+  padding: 20px;
+}
+
+h1 {
+  color: #00e5ff;
+}
+
+.info {
+  display: flex;
+  justify-content: space-around;
+  margin: 20px 0;
+  font-size: 20px;
+}
+
+button {
+  border: none;
+  padding: 12px 24px;
+  border-radius: 10px;
+  background: #00c853;
+  color: white;
+  font-size: 17px;
+  cursor: pointer;
+}
+
+#game {
+  position: relative;
+  height: 350px;
+  background: #101820;
+  border: 3px solid #00e5ff;
+  border-radius: 15px;
+  overflow: hidden;
+  margin-top: 20px;
+}
+
+#target {
+  position: absolute;
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  background: radial-gradient(circle, white 10%, #ff1744 35%, #b71c1c 75%);
+  cursor: pointer;
+  display: none;
+}
+
+#message {
+  margin-top: 18px;
+  font-size: 18px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h1>🎯 Acerte o Alvo!</h1>
+  <p>Clique nos alvos e faça o máximo de pontos!</p>
+
+  <div class="info">
+    <span>🏆 Pontos: <b id="score">0</b></span>
+    <span>⏱️ Tempo: <b id="time">30</b>s</span>
+  </div>
+
+  <button id="start">Começar jogo</button>
+
+  <div id="game">
+    <div id="target"></div>
+  </div>
+
+  <div id="message">Clique em começar para jogar!</div>
+</div>
+
+<script>
+const target = document.getElementById("target");
+const game = document.getElementById("game");
+const scoreText = document.getElementById("score");
+const timeText = document.getElementById("time");
+const message = document.getElementById("message");
+const startButton = document.getElementById("start");
+
+let score = 0;
+let time = 30;
+let playing = false;
+let timer;
+
+function moveTarget() {
+  const maxX = game.clientWidth - target.offsetWidth;
+  const maxY = game.clientHeight - target.offsetHeight;
+
+  target.style.left = Math.random() * maxX + "px";
+  target.style.top = Math.random() * maxY + "px";
+}
+
+function endGame() {
+  playing = false;
+  clearInterval(timer);
+  target.style.display = "none";
+  message.textContent = "🏆 Fim de jogo! Sua pontuação: " + score;
+  startButton.textContent = "Jogar novamente";
+}
+
+startButton.addEventListener("click", () => {
+  if (playing) return;
+
+  score = 0;
+  time = 30;
+  playing = true;
+
+  scoreText.textContent = score;
+  timeText.textContent = time;
+  message.textContent = "Boa sorte! Acerte os alvos!";
+  startButton.textContent = "Jogando...";
+
+  target.style.display = "block";
+  moveTarget();
+
+  timer = setInterval(() => {
+    time--;
+    timeText.textContent = time;
+
+    if (time <= 0) endGame();
+  }, 1000);
+});
+
+target.addEventListener("click", () => {
+  if (!playing) return;
+
+  score++;
+  scoreText.textContent = score;
+  moveTarget();
+});
+</script>
+
+</body>
+</html>
