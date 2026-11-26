@@ -2,87 +2,386 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
 <title>Galaxy Strike - Arcade</title>
 <style>
-*{box-sizing:border-box}
-body{margin:0;background:#050713;color:white;font-family:Arial,sans-serif;overflow:hidden;display:flex;justify-content:center;align-items:center;min-height:100vh}
-#game{position:relative;width:min(100vw,900px);height:min(100vh,650px);background:#080d24;overflow:hidden;border:2px solid #243c78;box-shadow:0 0 35px #174bba}
-canvas{width:100%;height:100%;display:block}
-#hud{position:absolute;top:12px;left:12px;right:12px;display:flex;justify-content:space-between;gap:6px;font-weight:bold;font-size:13px;text-shadow:0 0 8px #00cfff;pointer-events:none;flex-wrap:wrap}
-#hud span{background:#00000055;padding:2px 7px;border-radius:5px}
-#coinHud{color:#ffd966;text-shadow:0 0 8px #ffaa00}
-#overlay{position:absolute;inset:0;background:#030817df;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;overflow-y:auto}
-h1{font-size:clamp(26px,6vw,52px);color:#54eaff;text-shadow:0 0 20px #008cff;margin:0 0 8px}
-p{line-height:1.6;color:#d3e4ff;margin:3px 0}
-button{border:0;border-radius:10px;padding:11px 20px;background:#00bce8;color:#001321;font-weight:bold;font-size:15px;cursor:pointer;margin:5px}
-button:active{transform:scale(.96)}
-#mobile{position:absolute;bottom:10px;left:0;right:0;display:flex;justify-content:space-between;padding:0 16px;pointer-events:none}
-.pad{display:flex;gap:10px}
-.pad button{pointer-events:auto;opacity:.7;width:58px;height:52px;padding:0;font-size:22px}
-.small{font-size:12px;color:#9db8e9}
+/* ── Reset & Base ── */
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{
+  margin:0;
+  background:#020510;
+  color:#fff;
+  font-family:'Segoe UI',Arial,sans-serif;
+  overflow:hidden;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+  min-height:-webkit-fill-available;
+}
 
-/* ── Patch Notes ── */
-#patchBtn{position:absolute;top:12px;right:12px;z-index:50;background:transparent;border:1px solid #39a0ff;color:#70ccff;font-size:11px;padding:4px 8px;border-radius:6px;cursor:pointer;font-weight:bold}
-#patchBtn:hover{background:#0a1f3a}
-#patchOverlay{position:absolute;inset:0;background:#020b1aee;display:none;flex-direction:column;align-items:center;justify-content:flex-start;padding:24px 18px;overflow-y:auto;z-index:100;text-align:left}
-#patchOverlay h2{color:#54eaff;font-size:20px;margin:0 0 14px;width:100%;text-align:center}
-.patch-version{margin-bottom:12px;width:100%;max-width:620px}
-.patch-version h3{color:#ffd966;font-size:13px;margin:0 0 5px;border-bottom:1px solid #1e3560;padding-bottom:3px}
-.patch-version ul{margin:0;padding-left:16px;color:#b8d4f5;font-size:12px;line-height:1.7}
-.new-badge{background:#00ce74;color:#001c0f;font-size:9px;font-weight:bold;padding:1px 5px;border-radius:4px;margin-left:5px;vertical-align:middle}
+/* ── Game Container ── */
+#game{
+  position:relative;
+  width:min(100vw,900px);
+  height:min(100vh,650px);
+  height:min(-webkit-fill-available,650px);
+  background:#070c1f;
+  overflow:hidden;
+  border:1.5px solid #1a3870;
+  box-shadow:0 0 50px #0d2d7a60,inset 0 0 60px #00000080;
+}
+canvas{width:100%;height:100%;display:block}
+
+/* ── HUD ── */
+#hud{
+  position:absolute;
+  top:0;left:0;right:0;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:4px;
+  padding:8px 10px;
+  background:linear-gradient(to bottom,#00000088,transparent);
+  font-size:clamp(10px,2.5vw,13px);
+  font-weight:700;
+  pointer-events:none;
+  flex-wrap:wrap;
+}
+#hud span{
+  background:#ffffff0d;
+  backdrop-filter:blur(4px);
+  border:1px solid #ffffff14;
+  padding:3px 8px;
+  border-radius:20px;
+  color:#c8e8ff;
+  text-shadow:0 0 8px #00cfff88;
+  letter-spacing:.3px;
+}
+#coinHud{color:#ffd966;text-shadow:0 0 8px #ffaa0088!important;border-color:#ffaa0030!important}
+
+/* ── Overlays Base ── */
+#overlay,#patchOverlay,#shopOverlay{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:20px;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
+
+/* ── Main Menu ── */
+#overlay{background:linear-gradient(160deg,#030c1f 0%,#040e22 50%,#060818 100%)}
+.menu-logo{
+  font-size:clamp(28px,8vw,58px);
+  font-weight:900;
+  letter-spacing:-1px;
+  background:linear-gradient(135deg,#54eaff 0%,#007fff 50%,#c060ff 100%);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  filter:drop-shadow(0 0 20px #00cfff60);
+  margin:0 0 4px;
+  line-height:1.1;
+}
+.menu-sub{
+  font-size:clamp(10px,2.8vw,13px);
+  color:#5080a0;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  margin:0 0 18px;
+}
+.menu-desc{
+  font-size:clamp(11px,2.5vw,14px);
+  color:#8aaecc;
+  margin:0 0 20px;
+  line-height:1.6;
+  max-width:320px;
+}
+.controls-hint{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  justify-content:center;
+  margin-bottom:20px;
+}
+.ctrl-chip{
+  background:#0a1830;
+  border:1px solid #1a3860;
+  border-radius:8px;
+  padding:5px 10px;
+  font-size:11px;
+  color:#5a8abf;
+}
+.menu-buttons{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:8px;
+  width:100%;
+  max-width:260px;
+}
+.btn-primary{
+  width:100%;
+  padding:14px 24px;
+  background:linear-gradient(135deg,#00bce8,#0070c0);
+  color:#fff;
+  font-weight:800;
+  font-size:clamp(13px,3.5vw,16px);
+  letter-spacing:1px;
+  border:0;
+  border-radius:12px;
+  cursor:pointer;
+  box-shadow:0 4px 20px #00bce840;
+  transition:transform .12s,box-shadow .12s;
+}
+.btn-primary:active{transform:scale(.96);box-shadow:0 2px 10px #00bce830}
+.btn-secondary{
+  width:100%;
+  padding:10px 20px;
+  background:#0d1f3a;
+  color:#7ab8f5;
+  font-weight:700;
+  font-size:clamp(11px,2.8vw,13px);
+  border:1px solid #1a3860;
+  border-radius:10px;
+  cursor:pointer;
+  transition:background .15s;
+}
+.btn-secondary:active{background:#142848}
+.btn-row{display:flex;gap:8px;width:100%}
+.btn-row .btn-secondary{font-size:clamp(10px,2.5vw,12px)}
+
+/* ── Buttons generic ── */
+button{
+  border:0;border-radius:10px;padding:11px 20px;
+  background:#00bce8;color:#001321;font-weight:bold;
+  font-size:15px;cursor:pointer;margin:5px;
+}
+button:active{transform:scale(.96)}
+
+/* ── Patch Notes Button ── */
+#patchBtn{
+  position:absolute;top:10px;right:10px;z-index:50;
+  background:#0a1830;
+  border:1px solid #1a3860;
+  color:#54a0d8;
+  font-size:10px;padding:5px 9px;
+  border-radius:8px;cursor:pointer;font-weight:700;
+  transition:background .15s;
+}
+#patchBtn:active{background:#142848}
+
+/* ── Patch Notes Overlay ── */
+#patchOverlay{
+  background:#020b1af0;
+  display:none;
+  justify-content:flex-start;
+  padding:20px 16px;
+  z-index:100;
+  text-align:left;
+  backdrop-filter:blur(8px);
+}
+#patchOverlay h2{
+  color:#54eaff;font-size:18px;margin:0 0 16px;
+  width:100%;text-align:center;
+  text-shadow:0 0 16px #00cfff60;
+}
+.patch-version{margin-bottom:14px;width:100%;max-width:580px}
+.patch-version h3{
+  color:#ffd966;font-size:12px;margin:0 0 6px;
+  border-bottom:1px solid #1a3060;padding-bottom:4px;
+  letter-spacing:.5px;
+}
+.patch-version ul{margin:0;padding-left:16px;color:#8aaecc;font-size:11px;line-height:1.8}
+.new-badge{
+  background:#00ce74;color:#001c0f;font-size:9px;
+  font-weight:bold;padding:1px 5px;border-radius:4px;
+  margin-left:5px;vertical-align:middle;
+}
 #closePatch{margin-top:10px}
 
 /* ── Phase Banner ── */
-#phaseBanner{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:clamp(20px,5vw,42px);font-weight:bold;color:#fff;text-shadow:0 0 24px #ff3c8e,0 0 8px #fff;pointer-events:none;opacity:0;transition:opacity .4s;white-space:nowrap;z-index:40}
-#gamepadHint{position:absolute;bottom:68px;right:12px;font-size:11px;color:#3a6fa0;pointer-events:none;display:none}
+#phaseBanner{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  font-size:clamp(18px,5vw,40px);
+  font-weight:900;color:#fff;
+  text-shadow:0 0 24px #ff3c8e,0 0 8px #fff;
+  pointer-events:none;opacity:0;
+  transition:opacity .4s;white-space:nowrap;z-index:40;
+  letter-spacing:-0.5px;
+}
+#gamepadHint{
+  position:absolute;bottom:72px;right:12px;
+  font-size:10px;color:#2a4f70;
+  pointer-events:none;display:none;
+  background:#00000040;padding:3px 8px;border-radius:6px;
+}
 
 /* ── Shop Overlay ── */
-#shopOverlay{position:absolute;inset:0;background:#020b1af5;display:none;flex-direction:column;align-items:center;justify-content:flex-start;padding:18px;overflow-y:auto;z-index:200}
-#shopOverlay h2{color:#ffd966;font-size:20px;margin:0 0 4px;text-shadow:0 0 10px #ffaa00}
-.shop-coins{color:#ffd966;font-size:14px;margin-bottom:12px;font-weight:bold}
-.shop-tabs{display:flex;gap:6px;margin-bottom:14px}
-.shop-tab{background:#0d2545;border:1px solid #1e3a6a;color:#7ab8f5;font-size:12px;padding:6px 14px;border-radius:8px;cursor:pointer;font-weight:bold}
-.shop-tab.active{background:#00bce8;color:#001321;border-color:#00bce8}
-.shop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;width:100%;max-width:700px}
-.shop-item{background:#0a1a35;border:2px solid #1a3060;border-radius:10px;padding:12px;text-align:center;cursor:pointer;transition:border-color .2s}
-.shop-item:hover{border-color:#00bce8}
-.shop-item.owned{border-color:#00ce74}
-.shop-item.equipped{border-color:#ffd966;background:#1a1a00}
-.shop-item.locked{opacity:.5;cursor:default}
+#shopOverlay{
+  background:#020b1af8;
+  display:none;
+  justify-content:flex-start;
+  padding:16px 14px;
+  z-index:200;
+  backdrop-filter:blur(10px);
+}
+#shopOverlay h2{
+  color:#ffd966;font-size:18px;margin:0 0 4px;
+  text-shadow:0 0 12px #ffaa0060;font-weight:900;
+}
+.shop-coins{
+  color:#ffd966;font-size:13px;margin-bottom:10px;
+  font-weight:700;opacity:.85;
+}
+.shop-tabs{display:flex;gap:6px;margin-bottom:12px}
+.shop-tab{
+  background:#0d2040;border:1px solid #1a3560;
+  color:#5a8abf;font-size:11px;padding:7px 16px;
+  border-radius:20px;cursor:pointer;font-weight:700;
+  transition:all .15s;
+}
+.shop-tab.active{
+  background:linear-gradient(135deg,#00bce8,#0070c0);
+  color:#fff;border-color:transparent;
+  box-shadow:0 2px 12px #00bce840;
+}
+.shop-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+  gap:8px;width:100%;max-width:680px;
+}
+.shop-item{
+  background:#09182e;border:1.5px solid #162848;
+  border-radius:12px;padding:12px 10px;
+  text-align:center;cursor:pointer;
+  transition:border-color .2s,background .2s;
+}
+.shop-item:active{background:#0d2040}
+.shop-item.owned{border-color:#00ce7460;background:#04120a}
+.shop-item.equipped{border-color:#ffd966;background:#12100000}
+.shop-item.locked{opacity:.45;cursor:default}
 .shop-item canvas{display:block;margin:0 auto 6px}
-.shop-item-name{font-size:12px;font-weight:bold;color:#d3e4ff;margin-bottom:3px}
-.shop-item-desc{font-size:10px;color:#7a9abf;margin-bottom:6px;line-height:1.4}
-.shop-item-cost{font-size:12px;color:#ffd966;font-weight:bold}
+.shop-item-name{font-size:11px;font-weight:700;color:#c0d8f0;margin-bottom:3px}
+.shop-item-desc{font-size:10px;color:#4a6a8a;margin-bottom:5px;line-height:1.4}
+.shop-item-cost{font-size:11px;color:#ffd966;font-weight:700}
 .shop-item-cost.free{color:#00ce74}
 .shop-item-cost.equipped-lbl{color:#ffd966}
-.shop-item-cost.unlock-lbl{color:#a0c0ff;font-size:10px}
-#closeShop{margin-top:12px;background:#1a3060;color:#7ab8f5}
+.shop-item-cost.unlock-lbl{color:#7090c0;font-size:10px}
+#closeShop{
+  margin-top:10px;
+  background:linear-gradient(135deg,#00bce8,#0070c0);
+  color:#fff;border:0;font-weight:800;
+  box-shadow:0 4px 16px #00bce840;
+}
 
 /* ── Coin pop ── */
-.coin-pop{position:absolute;font-size:13px;font-weight:bold;color:#ffd966;pointer-events:none;text-shadow:0 0 6px #ffaa00;animation:coinPop .9s forwards}
-@keyframes coinPop{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-38px)}}
+.coin-pop{
+  position:absolute;font-size:12px;font-weight:800;
+  color:#ffd966;pointer-events:none;
+  text-shadow:0 0 8px #ffaa00;
+  animation:coinPop .9s forwards;
+  border-radius:10px;
+  background:#ffd96620;
+  padding:2px 6px;
+}
+@keyframes coinPop{
+  0%{opacity:1;transform:translateY(0) scale(1)}
+  40%{opacity:1;transform:translateY(-18px) scale(1.1)}
+  100%{opacity:0;transform:translateY(-42px) scale(.9)}
+}
+
+/* ── Mobile Controls ── */
+#mobile{
+  position:absolute;
+  bottom:0;left:0;right:0;
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  padding:0 12px calc(env(safe-area-inset-bottom, 0px) + 10px);
+  pointer-events:none;
+  z-index:30;
+}
+.pad{display:flex;gap:8px;align-items:flex-end}
+
+/* Mobile buttons – bigger, pill-shape, translucent */
+.mbtn{
+  pointer-events:auto;
+  width:62px;height:56px;
+  background:#ffffff12;
+  backdrop-filter:blur(6px);
+  border:1.5px solid #ffffff20;
+  border-radius:14px;
+  color:#ffffffcc;
+  font-size:22px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+  user-select:none;
+  -webkit-user-select:none;
+  transition:background .08s,transform .08s;
+  touch-action:manipulation;
+  /* force hardware composite layer */
+  will-change:transform;
+}
+.mbtn:active,.mbtn.pressed{
+  background:#00bce840;
+  border-color:#00bce880;
+  transform:scale(.93);
+}
+#fire{
+  width:68px;height:68px;
+  border-radius:50%;
+  background:#ff3c6e20;
+  border-color:#ff3c6e50;
+  font-size:28px;
+}
+#fire:active,#fire.pressed{
+  background:#ff3c6e50;
+  border-color:#ff3c6e;
+}
+
+/* ── Only show mobile on touch devices ── */
+@media (hover:hover) and (pointer:fine){
+  #mobile{display:none}
+}
 </style>
 </head>
 <body>
 <div id="game">
   <canvas id="screen" width="900" height="650"></canvas>
 
+  <!-- HUD -->
   <div id="hud">
-    <span id="score">Pontos: 0</span>
-    <span id="level">Fase: 1</span>
-    <span id="lives">Vidas: 3</span>
+    <span id="score">⚡ 0</span>
+    <span id="level">🌌 Fase 1</span>
+    <span id="lives">❤️ 3</span>
     <span id="coinHud">🪙 0</span>
-    <span id="record">Recorde: 0</span>
+    <span id="record">🏆 0</span>
   </div>
 
-  <button id="patchBtn" title="Novidades">📋 v3.0</button>
+  <button id="patchBtn" title="Novidades">📋 v3.1</button>
 
   <!-- Patch Notes -->
   <div id="patchOverlay">
     <h2>📋 NOVIDADES &amp; PATCH NOTES</h2>
     <div class="patch-version">
-      <h3>v3.0 — Arsenal &amp; Identidade <span class="new-badge">NOVO</span></h3>
+      <h3>v3.1 — Repaginação &amp; Mobile Fix <span class="new-badge">NOVO</span></h3>
+      <ul>
+        <li>🎨 <b>Layout repaginado</b>: HUD pill-style, gradientes, fonte maior</li>
+        <li>📱 <b>Controles mobile corrigidos</b>: botões maiores e responsivos ao toque</li>
+        <li>✨ <b>Menu principal</b>: logo com gradiente, visual mais limpo</li>
+        <li>🔘 <b>Botão de fogo</b>: agora é circular e visualmente distinto</li>
+        <li>🛡️ <b>Safe area</b>: controles respeitam notch e home bar do iPhone</li>
+      </ul>
+    </div>
+    <div class="patch-version">
+      <h3>v3.0 — Arsenal &amp; Identidade</h3>
       <ul>
         <li>🪙 <b>Sistema de Moedas</b>: caem dos inimigos + bônus de fase</li>
         <li>🏪 <b>Loja entre fases</b>: upgrades permanentes e temporários</li>
@@ -90,7 +389,6 @@ button:active{transform:scale(.96)}
         <li>🚀 <b>8 Skins de nave</b>: 4 compráveis com moedas, 4 desbloqueáveis por fase</li>
         <li>👾 <b>Novos inimigos</b>: Fantasma, Tanque, Atirador e Ziguezague</li>
         <li>🌌 <b>Fases 7, 8 e 9</b>: Vazio Negro, Tempestade Solar e Núcleo Galáctico</li>
-        <li>🐛 <b>Fix</b>: dano fantasma corrigido (inimigos saindo pela base)</li>
       </ul>
     </div>
     <div class="patch-version">
@@ -103,17 +401,13 @@ button:active{transform:scale(.96)}
     </div>
     <div class="patch-version">
       <h3>v1.5 — Ondas de Elite</h3>
-      <ul>
-        <li>Fase 5, chefão roxo, triple-shot, recorde salvo</li>
-      </ul>
+      <ul><li>Fase 5, chefão roxo, triple-shot, recorde salvo</li></ul>
     </div>
     <div class="patch-version">
       <h3>v1.0 — Lançamento</h3>
-      <ul>
-        <li>Fases 1–4, sistema de vidas, pontos, chefões, controles</li>
-      </ul>
+      <ul><li>Fases 1–4, sistema de vidas, pontos, chefões, controles</li></ul>
     </div>
-    <button id="closePatch">✖ Fechar</button>
+    <button id="closePatch" class="btn-primary" style="max-width:200px">✖ Fechar</button>
   </div>
 
   <!-- Shop -->
@@ -125,35 +419,41 @@ button:active{transform:scale(.96)}
       <button class="shop-tab" id="tabSkins" onclick="showTab('skins')">🚀 Skins</button>
     </div>
     <div class="shop-grid" id="shopGrid"></div>
-    <button id="closeShop" onclick="closeShop()">▶ Continuar para Fase <span id="nextPhaseNum"></span></button>
+    <button id="closeShop" onclick="closeShop()">▶ Continuar — Fase <span id="nextPhaseNum"></span></button>
   </div>
 
   <div id="phaseBanner"></div>
 
   <!-- Main Menu -->
   <div id="overlay">
-    <h1>GALAXY STRIKE</h1>
-    <p>Defenda a galáxia! Destrua inimigos e derrote os chefões.</p>
-    <p style="margin-top:6px;font-size:12px;color:#7ab8f5">
-      ⌨️ ← → / A D &nbsp;|&nbsp; Espaço atirar &nbsp;|&nbsp;
-      🎮 D-Pad / A/X &nbsp;|&nbsp; 📱 Botões
-    </p>
-    <button id="start">INICIAR MISSÃO</button>
-    <div style="display:flex;gap:6px;margin-top:4px;justify-content:center">
-      <button onclick="openPatch()" style="font-size:11px;padding:6px 12px;background:#0d2545;color:#70ccff">📋 Novidades v3.0</button>
-      <button onclick="openGarageMenu()" style="font-size:11px;padding:6px 12px;background:#1a1a00;color:#ffd966">🚀 Hangar</button>
+    <div class="menu-logo">GALAXY STRIKE</div>
+    <div class="menu-sub">Space Arcade</div>
+    <p class="menu-desc">Defenda a galáxia! Destrua inimigos e derrote os chefões para avançar de fase.</p>
+    <div class="controls-hint">
+      <span class="ctrl-chip">⌨️ ← → mover</span>
+      <span class="ctrl-chip">Space atirar</span>
+      <span class="ctrl-chip">🎮 Gamepad</span>
+      <span class="ctrl-chip">📱 Botões</span>
     </div>
-    <div class="small" style="margin-top:5px">Colete moedas e faça upgrades entre as fases!</div>
+    <div class="menu-buttons">
+      <button id="start" class="btn-primary">🚀 INICIAR MISSÃO</button>
+      <div class="btn-row">
+        <button class="btn-secondary" onclick="openPatch()">📋 v3.1</button>
+        <button class="btn-secondary" onclick="openGarageMenu()">🏪 Hangar</button>
+      </div>
+      <div style="font-size:11px;color:#2a4f70;margin-top:4px">Colete moedas e faça upgrades entre fases!</div>
+    </div>
   </div>
 
+  <!-- Mobile Controls -->
   <div id="mobile">
     <div class="pad">
-      <button id="left">◀</button>
-      <button id="right">▶</button>
+      <button id="left" class="mbtn">◀</button>
+      <button id="right" class="mbtn">▶</button>
     </div>
-    <button id="fire">🔥</button>
+    <button id="fire" class="mbtn">🔥</button>
   </div>
-  <div id="gamepadHint">🎮 Gamepad</div>
+  <div id="gamepadHint">🎮 Gamepad conectado</div>
 </div>
 
 <script>
@@ -165,18 +465,12 @@ const $=id=>document.getElementById(id);
 // ══════════════════════════════════════════════
 // PERSISTÊNCIA
 // ══════════════════════════════════════════════
-function loadSave(){
-  try{return JSON.parse(localStorage.getItem("gsave")||"{}")}catch{return{}}
-}
-function writeSave(){
-  localStorage.setItem("gsave",JSON.stringify(SAVE));
-}
+function loadSave(){try{return JSON.parse(localStorage.getItem("gsave")||"{}")}catch{return{}}}
+function writeSave(){localStorage.setItem("gsave",JSON.stringify(SAVE))}
 const SAVE=Object.assign({
-  coins:0, record:0,
+  coins:0,record:0,
   upgrades:{fireRate:0,damage:0,triple:0,shield:0,extraLife:0},
-  ownedSkins:["alpha"],
-  equippedSkin:"alpha",
-  unlockedPhases:1
+  ownedSkins:["alpha"],equippedSkin:"alpha",unlockedPhases:1
 },loadSave());
 
 // ══════════════════════════════════════════════
@@ -242,11 +536,11 @@ const SKINS={
 // UPGRADES DEFINIÇÃO
 // ══════════════════════════════════════════════
 const UPGRADE_DEFS=[
-  {id:"fireRate",name:"⚡ Cadência",desc:"Atira mais rápido",maxLevel:5,costs:[80,150,250,400,600],effect:"Reduz cooldown de tiro"},
-  {id:"damage", name:"💥 Dano",   desc:"Mais dano por tiro",maxLevel:5,costs:[100,200,350,500,700],effect:"Mata inimigos mais rápido"},
-  {id:"triple", name:"🔱 Tiro Triplo",desc:"Disparo permanente triplo",maxLevel:3,costs:[200,400,700],effect:"3 projéteis simultâneos"},
-  {id:"shield", name:"🛡️ Escudo",  desc:"Escudo dura mais",maxLevel:4,costs:[150,300,500,800],effect:"Tempo de escudo aumentado"},
-  {id:"extraLife",name:"❤️ Vida Extra",desc:"Começa com mais vida",maxLevel:3,costs:[300,600,1000],effect:"Mais uma vida inicial"},
+  {id:"fireRate",name:"⚡ Cadência",desc:"Atira mais rápido",maxLevel:5,costs:[80,150,250,400,600]},
+  {id:"damage", name:"💥 Dano",   desc:"Mais dano por tiro",maxLevel:5,costs:[100,200,350,500,700]},
+  {id:"triple", name:"🔱 Tiro Triplo",desc:"Disparo triplo permanente",maxLevel:3,costs:[200,400,700]},
+  {id:"shield", name:"🛡️ Escudo",  desc:"Escudo dura mais",maxLevel:4,costs:[150,300,500,800]},
+  {id:"extraLife",name:"❤️ Vida Extra",desc:"Começa com mais vida",maxLevel:3,costs:[300,600,1000]},
 ];
 
 // ══════════════════════════════════════════════
@@ -257,10 +551,10 @@ let bullets=[],enemies=[],enemyShots=[],bonuses=[],stars=[],particles=[];
 let boss=null,spawnTimer=0,shotTimer=0;
 let tripleTimer=0,shieldTimer=0,player;
 let phaseBannerTimer=0,gamepadConnected=false,gamepadSupported=true;
-let sessionCoins=0; // moedas da sessão atual
+let sessionCoins=0;
 const GAMEPAD_DEAD=0.25;
 
-$("record").textContent="Recorde: "+SAVE.record;
+$("record").textContent="🏆 "+SAVE.record;
 $("coinHud").textContent="🪙 "+SAVE.coins;
 
 for(let i=0;i<130;i++)stars.push({x:Math.random()*W,y:Math.random()*H,s:Math.random()*2+.5,v:Math.random()*1.8+.3});
@@ -324,11 +618,11 @@ function openGarageMenu(){
   running=false;
   $("shopCoins").textContent="🪙 "+SAVE.coins+" moedas";
   $("nextPhaseNum").textContent="Menu";
-  $("closeShop").textContent="✖ Voltar ao Menu";
+  $("closeShop").innerHTML="✖ Voltar ao Menu";
   $("closeShop").onclick=()=>{
     $("shopOverlay").style.display="none";
     $("overlay").style.display="flex";
-    $("closeShop").textContent="▶ Continuar para Fase ";
+    $("closeShop").innerHTML="▶ Continuar — Fase <span id='nextPhaseNum'></span>";
     $("closeShop").onclick=closeShop;
   };
   renderShop();
@@ -348,7 +642,6 @@ function renderShop(){
       const canBuy=!maxed&&SAVE.coins>=cost;
       const item=document.createElement("div");
       item.className="shop-item"+(maxed?" owned":"");
-      // mini preview canvas
       const c=document.createElement("canvas");c.width=60;c.height=20;
       const cx=c.getContext("2d");
       for(let i=0;i<def.maxLevel;i++){
@@ -378,7 +671,6 @@ function renderShop(){
       const canBuy=sk.cost>0&&!owned&&SAVE.coins>=sk.cost;
       const item=document.createElement("div");
       item.className="shop-item"+(equipped?" equipped":owned?" owned":phaseUnlock&&!canUnlock?" locked":"");
-      // preview canvas
       const c=document.createElement("canvas");c.width=70;c.height=70;
       const cx=c.getContext("2d");
       cx.save();cx.translate(35,38);cx.shadowBlur=0;
@@ -388,7 +680,7 @@ function renderShop(){
       if(equipped) costHtml=`<div class="shop-item-cost equipped-lbl">✅ EQUIPADA</div>`;
       else if(owned) costHtml=`<div class="shop-item-cost free">Equipar</div>`;
       else if(sk.unlockPhase>0) costHtml=`<div class="shop-item-cost unlock-lbl">${canUnlock?"🔓 Disponível":"🔒 Fase "+sk.unlockPhase}</div>`;
-      else costHtml=`<div class="shop-item-cost ${canBuy?"":""}">🪙 ${sk.cost}</div>`;
+      else costHtml=`<div class="shop-item-cost">🪙 ${sk.cost}</div>`;
       item.innerHTML+=`<div class="shop-item-name">${sk.name}</div><div class="shop-item-desc">${sk.desc}</div>${costHtml}`;
       item.onclick=()=>{
         if(equipped)return;
@@ -442,11 +734,11 @@ function reset(){
   updateHud();
 }
 function updateHud(){
-  $("score").textContent="Pontos: "+score;
-  $("level").textContent="Fase: "+level;
-  $("lives").textContent="Vidas: "+lives;
+  $("score").textContent="⚡ "+score;
+  $("level").textContent="🌌 Fase "+level;
+  $("lives").textContent="❤️ "+lives;
   $("coinHud").textContent="🪙 "+SAVE.coins;
-  $("record").textContent="Recorde: "+SAVE.record;
+  $("record").textContent="🏆 "+SAVE.record;
 }
 
 function spawnNebulaParticles(x,y,n,color){
@@ -620,19 +912,10 @@ function shoot(){
 // ══════════════════════════════════════════════
 function getEnemyTypeForLevel(){
   const r=Math.random();
-  if(level>=9){
-    if(r<.2)return"ghost";if(r<.4)return"tank";if(r<.6)return"sniper";if(r<.75)return"zigzag";
-    if(r<.85)return"hunter";if(r<.92)return"diver";return"normal";
-  }
-  if(level>=8){
-    if(r<.25)return"sniper";if(r<.5)return"zigzag";if(r<.7)return"tank";return"normal";
-  }
-  if(level>=7){
-    if(r<.3)return"ghost";if(r<.6)return"zigzag";if(r<.8)return"sniper";return"normal";
-  }
-  if(level>=6){
-    if(r<.28)return"hunter";if(r<.52)return"armored";if(r<.70)return"diver";return"normal";
-  }
+  if(level>=9){if(r<.2)return"ghost";if(r<.4)return"tank";if(r<.6)return"sniper";if(r<.75)return"zigzag";if(r<.85)return"hunter";if(r<.92)return"diver";return"normal";}
+  if(level>=8){if(r<.25)return"sniper";if(r<.5)return"zigzag";if(r<.7)return"tank";return"normal";}
+  if(level>=7){if(r<.3)return"ghost";if(r<.6)return"zigzag";if(r<.8)return"sniper";return"normal";}
+  if(level>=6){if(r<.28)return"hunter";if(r<.52)return"armored";if(r<.70)return"diver";return"normal";}
   return"normal";
 }
 function enemySpawn(){
@@ -653,8 +936,6 @@ function enemySpawn(){
 }
 
 function spawnBoss(){
-  const theme=getPhaseTheme();
-  const isCrimson=level>=6;
   const hpMult=level>=9?2.2:level>=8?1.8:level>=7?1.5:level>=6?1.3:1;
   const phase=level>=9?"galactic":level>=8?"solar":level>=7?"void":level>=6?"crimson":"normal";
   const names={crimson:"COLOSSO CARMESIM",void:"SENHOR DO VAZIO",solar:"TITÃ SOLAR",galactic:"REI GALÁCTICO",normal:"CHEFÃO FASE "+level};
@@ -743,7 +1024,6 @@ function update(){
     if(e.type==="hunter"){const dx=player.x-e.x;e.x+=Math.sign(dx)*Math.min(Math.abs(dx)*.04+1.2,3.5);e.y+=e.vy;}
     else if(e.type==="zigzag"){e.x+=e.vx;e.y+=e.vy;if(e.x<e.r||e.x>W-e.r){e.vx*=-1;}if(Math.random()<.04)e.vx*=-1;}
     else{e.x+=e.vx;e.y+=e.vy;if(e.x<e.r||e.x>W-e.r)e.vx*=-1;}
-    // shooting
     if(e.shotCd>0)e.shotCd--;
     else{
       const cd=Math.max(16,level>=6?50-level*2:110)+Math.floor(Math.random()*30);e.shotCd=cd;
@@ -758,21 +1038,18 @@ function update(){
     }
     if(e.y>H+e.r){e.hp=0;return;}
     const colDist=e.r+15;
-    if(Math.abs(e.x-player.x)<colDist&&Math.abs(e.y-player.y)<colDist&&Math.hypot(e.x-player.x,e.y-player.y)<colDist){
-      e.hp=0;hitPlayer();
-    }
+    if(Math.abs(e.x-player.x)<colDist&&Math.abs(e.y-player.y)<colDist&&Math.hypot(e.x-player.x,e.y-player.y)<colDist){e.hp=0;hitPlayer();}
   });
 
   enemyShots.forEach(b=>{b.x+=b.vx||0;b.y+=b.vy});
   enemyShots=enemyShots.filter(b=>b.y<H+20&&b.y>-20&&b.x>-20&&b.x<W+20);
   enemyShots.forEach(b=>{if(Math.hypot(b.x-player.x,b.y-player.y)<22){b.y=H+50;hitPlayer();}});
 
-  // bullet hits
   bullets.forEach(b=>{
     enemies.forEach(e=>{
       if(e.hp>0&&Math.hypot(b.x-e.x,b.y-e.y)<e.r+8){
         if(e.type==="armored"&&e.shieldHp>0){e.shieldHp=0;b.y=-50;spawnNebulaParticles(e.x,e.y,4,"#77bbff");}
-        else if(e.type==="ghost"&&Math.random()<.4){b.y=-50;} // fantasma desvia
+        else if(e.type==="ghost"&&Math.random()<.4){b.y=-50;}
         else{
           const dmg=b.dmg||1;e.hp-=dmg;b.y=-50;
           const col=e.type==="tank"?"#88bb55":e.type==="armored"?"#3a7bff":e.type==="hunter"?"#ff7a1a":e.type==="diver"?"#cc1a3a":e.type==="ghost"?"#aaaaff":e.type==="sniper"?"#cc44cc":e.type==="zigzag"?"#ffcc00":"#ff466c";
@@ -780,8 +1057,7 @@ function update(){
           if(e.hp<=0){
             const pts=level>=7?35:level>=6?25:10+level*2;
             const coinAmt=e.type==="tank"?5:e.type==="armored"?4:e.type==="sniper"?3:e.type==="ghost"?2:1;
-            score+=pts;
-            SAVE.coins+=coinAmt;sessionCoins+=coinAmt;writeSave();updateHud();
+            score+=pts;SAVE.coins+=coinAmt;sessionCoins+=coinAmt;writeSave();updateHud();
             spawnCoinPop(e.x,e.y,coinAmt);
             if(Math.random()<.18)addBonus(e.x,e.y,Math.random()<.4);
           }
@@ -792,14 +1068,14 @@ function update(){
       const dmg=b.dmg||1;boss.hp-=dmg;b.y=-50;
       spawnNebulaParticles(boss.x+(Math.random()-.5)*60,boss.y+(Math.random()-.5)*40,3,boss.fury?"#ff7700":"#c97dff");
       if(boss.hp<=0){
-        const bossCoins=50+level*10;score+=boss.phase==="galactic"?3000:boss.phase==="solar"?2500:boss.phase==="void"?2000:boss.phase==="crimson"?1500:500;
+        const bossCoins=50+level*10;
+        score+=boss.phase==="galactic"?3000:boss.phase==="solar"?2500:boss.phase==="void"?2000:boss.phase==="crimson"?1500:500;
         SAVE.coins+=bossCoins;sessionCoins+=bossCoins;writeSave();
         spawnCoinPop(boss.x,boss.y,bossCoins);
         spawnNebulaParticles(boss.x,boss.y,40,"#c97dff");
         boss=null;
         if(level>SAVE.unlockedPhases){SAVE.unlockedPhases=level;writeSave();}
         level++;spawnTimer=120;updateHud();
-        // phase bonus coins
         const phaseBonus=20+level*5;SAVE.coins+=phaseBonus;writeSave();updateHud();
         openShop();return;
       }
@@ -822,7 +1098,6 @@ function update(){
   });
   bonuses=bonuses.filter(b=>b.y<H+20);
 
-  // level up (non-boss)
   if(score>=level*200&&level%5!==0&&!boss){
     if(level>SAVE.unlockedPhases){SAVE.unlockedPhases=level;writeSave();}
     const phaseBonus=15+level*3;SAVE.coins+=phaseBonus;writeSave();updateHud();
@@ -851,13 +1126,16 @@ function startNextPhase(){
 function endGame(){
   running=false;
   const phasebonus=sessionCoins>0?`<br><span style="color:#ffd966">🪙 +${sessionCoins} moedas nesta sessão</span>`:"";
-  $("overlay").style.display="flex";
-  $("overlay").innerHTML=
-    `<h1>FIM DE JOGO</h1>
-    <p>Pontuação: <b>${score}</b><br>Fase alcançada: <b>${level}</b>${phasebonus}<br>
+  const overlay=$("overlay");
+  overlay.style.display="flex";
+  overlay.innerHTML=
+    `<div class="menu-logo" style="font-size:clamp(22px,6vw,46px)">FIM DE JOGO</div>
+    <p class="menu-desc">Pontuação: <b style="color:#54eaff">${score}</b><br>Fase alcançada: <b>${level}</b>${phasebonus}<br>
     ${score>=SAVE.record&&score>0?'<span style="color:#ffd966">🏆 Novo Recorde!</span>':"Recorde: "+SAVE.record}</p>
-    <button id="start">JOGAR NOVAMENTE</button>
-    <button onclick="openGarageMenu()" style="font-size:12px;padding:7px 14px;background:#1a1a00;color:#ffd966">🏪 Loja / Hangar</button>`;
+    <div class="menu-buttons">
+      <button id="start" class="btn-primary">🔄 JOGAR NOVAMENTE</button>
+      <button onclick="openGarageMenu()" class="btn-secondary">🏪 Loja / Hangar</button>
+    </div>`;
   $("start").onclick=startGame;
 }
 
@@ -869,7 +1147,7 @@ function startGame(){
 $("start").onclick=startGame;
 
 // ══════════════════════════════════════════════
-// INPUT
+// INPUT — TECLADO
 // ══════════════════════════════════════════════
 document.addEventListener("keydown",e=>{
   keys[e.key]=true;
@@ -877,12 +1155,48 @@ document.addEventListener("keydown",e=>{
   if(["ArrowLeft","ArrowRight"," ","Space"].includes(e.key))e.preventDefault();
 });
 document.addEventListener("keyup",e=>{keys[e.key]=false;if(e.key===" "||e.key==="Space")keys["Space_kb"]=false;});
-function bindButton(id,key){
-  const b=$(id);if(!b)return;
-  b.addEventListener("pointerdown",e=>{e.preventDefault();keys[key]=true});
-  ["pointerup","pointerleave","pointercancel"].forEach(ev=>b.addEventListener(ev,()=>keys[key]=false));
+
+// ══════════════════════════════════════════════
+// INPUT — MOBILE TOUCH (corrigido)
+// ══════════════════════════════════════════════
+function bindMobileBtn(id, key) {
+  const btn = $(id);
+  if (!btn) return;
+
+  // Adiciona feedback visual
+  const press = () => { btn.classList.add('pressed'); keys[key] = true; };
+  const release = () => { btn.classList.remove('pressed'); keys[key] = false; };
+
+  // Touch events (prioridade) — preventDefault evita delay de 300ms e scroll acidental
+  btn.addEventListener("touchstart",  e => { e.preventDefault(); press(); }, {passive: false});
+  btn.addEventListener("touchend",    e => { e.preventDefault(); release(); }, {passive: false});
+  btn.addEventListener("touchcancel", e => { e.preventDefault(); release(); }, {passive: false});
+
+  // Pointer events como fallback para mouse/pen
+  btn.addEventListener("pointerdown",  e => { if(e.pointerType !== 'touch') press(); });
+  btn.addEventListener("pointerup",    e => { if(e.pointerType !== 'touch') release(); });
+  btn.addEventListener("pointerleave", e => { if(e.pointerType !== 'touch') release(); });
 }
-bindButton("left","ArrowLeft");bindButton("right","ArrowRight");bindButton("fire","Space");
+
+bindMobileBtn("left",  "ArrowLeft");
+bindMobileBtn("right", "ArrowRight");
+bindMobileBtn("fire",  "Space");
+
+// Auto-fire enquanto botão fire estiver pressionado
+let fireInterval = null;
+const fireBtn = $("fire");
+fireBtn.addEventListener("touchstart", e => {
+  e.preventDefault();
+  if(fireInterval) return;
+  fireInterval = setInterval(() => { if(running && keys["Space"]) shoot(); }, 80);
+}, {passive: false});
+["touchend","touchcancel"].forEach(ev =>
+  fireBtn.addEventListener(ev, e => {
+    e.preventDefault();
+    clearInterval(fireInterval);
+    fireInterval = null;
+  }, {passive: false})
+);
 
 // ══════════════════════════════════════════════
 // LOOP
