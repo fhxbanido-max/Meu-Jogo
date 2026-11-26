@@ -82,20 +82,30 @@ let AC,lc=0,MB,DL,NB;
 const aud=()=>{try{if(!AC){AC=new(window.AudioContext||window.webkitAudioContext)();MB=AC.createGain();MB.gain.value=.8;MB.connect(AC.destination);DL=AC.createDelay();DL.delayTime.value=.27;const fb=AC.createGain();fb.gain.value=.32;DL.connect(fb);fb.connect(DL);DL.connect(MB);NB=AC.createBuffer(1,AC.sampleRate>>1,AC.sampleRate);const d=NB.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1}AC.resume()}catch(e){}};
 const snd=(f,d,t,v,sl)=>{if(S.mute||!AC)return;const o=AC.createOscillator(),g=AC.createGain(),n=AC.currentTime;o.type=t;o.frequency.setValueAtTime(f,n);if(sl)o.frequency.exponentialRampToValueAtTime(Math.max(30,f+sl),n+d);g.gain.setValueAtTime(v,n);g.gain.exponentialRampToValueAtTime(.001,n+d);o.connect(g);g.connect(AC.destination);o.start(n);o.stop(n+d)};
 const SFX={shot:()=>snd(900,.07,'square',.025,-600),boom:()=>snd(180,.35,'sawtooth',.09,-140),hit:()=>snd(130,.3,'sawtooth',.12,-80),pow:()=>snd(500,.3,'sine',.09,700),bomb:()=>snd(100,.9,'sawtooth',.14,-70),coin:()=>{const n=performance.now();if(n-lc>60){lc=n;snd(1300,.08,'triangle',.05,600)}}};
-/* trilha original "Neon Cruise": clima synth-pop anos 80, melodia própria */
-const SD=60/112/4,CH=[[220,261.63,329.63],[174.61,220,261.63],[261.63,329.63,392],[196,246.94,293.66]],RT=[55,43.65,65.41,49],ML=Array(64).fill(0);
-[[0,7,2],[3,12,1],[4,10,2],[8,7,3],[12,3,2],[16,8,2],[19,12,1],[20,8,2],[24,3,3],[28,5,2],[32,10,2],[35,15,1],[36,12,2],[40,10,3],[44,7,2],[48,5,2],[51,10,1],[52,14,2],[56,12,3],[60,10,2]].forEach(([s,n,l])=>ML[s]=[440*2**(n/12),l]);
+/* trilhas originais (melodias próprias). Inspiradas no clima electro de Flower In A Hurricane, do Justice */
+const TR=[
+{n:'Neon Cruise',bpm:112,T:110,P:[[0,1],[-4,0],[3,0],[-2,0]],K:[0,6,8,10],S:[4,12],B:[0,2,4,6,8,10,12,14],O:[6,14],bw:'sawtooth',lw:'square',
+M:[[0,7,2],[3,12,1],[4,10,2],[8,7,3],[12,3,2],[16,8,2],[19,12,1],[20,8,2],[24,3,3],[28,5,2],[32,10,2],[35,15,1],[36,12,2],[40,10,3],[44,7,2],[48,5,2],[51,10,1],[52,14,2],[56,12,3],[60,10,2]]},
+{n:'Hurricane Bloom',bpm:124,T:98,P:[[0,1],[-2,0],[-4,0],[-5,0]],K:[0,4,8,12],S:[4,12],B:[2,3,6,7,10,11,14,15],O:[3,11],ST:[2,6,10,14],bw:'sawtooth',lw:'sawtooth',
+M:[[0,7,1],[2,12,1],[3,15,2],[6,14,2],[8,12,2],[11,7,1],[12,10,2],[16,5,1],[18,10,1],[19,14,2],[22,12,2],[24,10,2],[27,5,1],[28,7,2],[32,3,1],[34,8,1],[35,12,2],[38,10,2],[40,8,2],[43,3,1],[44,5,2],[48,2,1],[50,7,1],[51,11,2],[52,14,2],[56,12,2],[58,11,2],[60,7,3]]},
+{n:'Bloom Chill',bpm:84,T:98,P:[[0,1],[-2,0],[-4,0],[-5,0]],K:[0,10],S:[8],B:[0,6,10],O:[],bw:'triangle',lw:'sine',
+M:[[0,12,6],[8,7,6],[16,10,6],[24,14,4],[32,8,6],[40,12,6],[48,11,4],[52,14,6]]},
+{n:'Bloom Arcade',bpm:150,T:110,P:[[0,1],[-2,0],[-4,0],[-5,0]],K:[0,8],S:[4,12],B:[0,2,4,6,8,10,12,14],O:[4,12],A:1,bw:'square',lw:'square',M:[]}];
+const tr=()=>TR[S.trk]||TR[0];
+const tk=()=>`<div class=lb>Trilha sonora</div><div class=row>${TR.map((t,i)=>`<button class="ch ${i==(S.trk|0)?'on':''}" data-a=trk data-i=${i}>${t.n}</button>`).join('')}</div>`;
 let nt=0,ns=0;
 const tn=(f,t,d,ty,v,fx)=>{const o=AC.createOscillator(),g=AC.createGain();o.type=ty;o.frequency.value=f;g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(v,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(MB);if(fx)g.connect(DL);o.start(t);o.stop(t+d+.02)};
 const nz=(t,d,v,hp)=>{const s=AC.createBufferSource(),g=AC.createGain(),f=AC.createBiquadFilter();s.buffer=NB;f.type='highpass';f.frequency.value=hp;g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);s.connect(f);f.connect(g);g.connect(MB);s.start(t);s.stop(t+d)};
 const kick=t=>{const o=AC.createOscillator(),g=AC.createGain();o.frequency.setValueAtTime(150,t);o.frequency.exponentialRampToValueAtTime(45,t+.14);g.gain.setValueAtTime(.35,t);g.gain.exponentialRampToValueAtTime(.0001,t+.25);o.connect(g);g.connect(MB);o.start(t);o.stop(t+.26)};
-function step(i,t){const b=i>>4,s=i&15;
-if(s%8==0||s==6||s==10)kick(t);
-if(s==4||s==12){nz(t,.18,.14,1500);tn(190,t,.1,'triangle',.08)}
-if(s%2==0){nz(t,.04,.05,7000);tn(RT[b]*(s%8==6?2:1),t,SD*1.8,'sawtooth',.05)}
-if(s==0)CH[b].forEach(f=>tn(f,t,SD*15,'triangle',.035));
-const m=ML[i];if(m)tn(m[0],t,SD*m[1]+.1,'square',.03,1)}
-setInterval(()=>{if(!AC||S.mute||state=='pause'){nt=0;return}const n=AC.currentTime;if(nt<n)nt=n+.05;while(nt<n+.15){step(ns%64,nt);nt+=SD;ns++}},40);
+function step(i,t){const r=tr(),b=i>>4,s=i&15,[o,mn]=r.P[b],sd=60/r.bpm/4,q=mn?[0,3,7]:[0,4,7],F=(k,x)=>r.T*k*2**((o+x)/12);
+if(r.K.includes(s))kick(t);
+if(r.S.includes(s)){nz(t,.18,.14,1500);tn(190,t,.1,'triangle',.08)}
+if(s%2==0||r.A)nz(t,.04,.05,7000);
+if(r.B.includes(s))tn(F(.5,0)*(r.O.includes(s)?2:1),t,sd*1.8,r.bw,.05);
+if(r.ST){if(r.ST.includes(s))q.forEach(x=>tn(F(2,x),t,sd*1.5,'sawtooth',.025))}else if(s==0)q.forEach(x=>tn(F(2,x),t,sd*15,'triangle',.035));
+if(r.A)tn(F(4,[0,q[1],q[2],12][s&3]),t,sd*.9,'square',.02);
+const m=r.M.find(n=>n[0]==i);if(m)tn(r.T*4*2**(m[1]/12),t,sd*m[2]+.1,r.lw,.03,1)}
+setInterval(()=>{if(!AC||S.mute||state=='pause'){nt=0;return}const n=AC.currentTime,sd=60/tr().bpm/4;if(nt<n)nt=n+.05;while(nt<n+.15){step(ns%64,nt);nt+=sd;ns++}},40);
 
 /* ---------- jogo ---------- */
 let G,state='menu',dr=null,last=0,bgY=0,shake=0;const keys={};
@@ -176,7 +186,7 @@ ui(`<h1>GALAXY<br><b>STRIKE</b></h1><small class=cr>Jogo criado por <b>Luiz Henr
 <button class=bt data-a=play>Jogar</button><button class=bt data-a=shop>Hangar</button>
 <div class=lb>Dificuldade (mais difícil, mais moedas)</div>
 <div class=row>${DF.map((d,i)=>`<button class="ch ${i==S.diff?'on':''}" data-a=diff data-i=${i}>${d.n}</button>`).join('')}</div>
-<button class="bt own ${S.owner?'on':''}" data-a=own>👑 Modo Dono: ${S.owner?'ativado':'desativado'}</button>
+${tk()}<button class="bt own ${S.owner?'on':''}" data-a=own>👑 Modo Dono: ${S.owner?'ativado':'desativado'}</button>
 <small>${S.owner?'Moedas ×3, +2 vidas, bombas infinitas, +50% de dano, ímã máximo, regeneração, loja −50%, todas as naves liberadas':'Arraste para mover, o tiro é automático. Toque em 💥 para a bomba.'}</small>`)}
 function shop(){const ow=S.owner;
 ui(`<h2>Hangar</h2><div class=co>🪙 ${S.coins}</div><div class=lb>Naves</div>
@@ -195,6 +205,7 @@ else if(a=='ship'){if(S.ships[i]||S.owner)S.ship=i;else if(S.coins>=SH[i].p){S.c
 else if(a=='up'){const c=upc(i);if(S.up[i]<8&&S.coins>=c){S.coins-=c;S.up[i]++;save();SFX.pow()}shop()}
 else if(a=='pause'&&state=='play'){state='pause';st.classList.remove('pl');ui('<h2>Pausado</h2><button class=bt data-a=resume>Continuar</button><button class=bt data-a=menu>Sair para o menu</button>')}
 else if(a=='resume'&&state=='pause'){state='play';st.classList.add('pl');ui('')}
+else if(a=='trk'){S.trk=i;save();ns=0;nt=0;menu()}
 else if(a=='mute'){S.mute=!S.mute;save();ic()}}
 
 /* ---------- controles ---------- */
